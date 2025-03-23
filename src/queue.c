@@ -12,12 +12,7 @@ void enqueue(struct queue_t * q, struct pcb_t * proc) {
         if (proc == NULL || q == NULL || q->size == MAX_QUEUE_SIZE) {
                 return;
         }
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        q->proc[i] = proc;
-                        return;
-                }
-        }
+        q->proc[q->size++] = proc;
 }
 
 struct pcb_t * dequeue(struct queue_t * q) {
@@ -27,20 +22,12 @@ struct pcb_t * dequeue(struct queue_t * q) {
         if (q == NULL || q->size == 0) {
                 return NULL;
         }
-        struct pcb_t * ans = NULL;
-        uint32_t current_priority = 0;
-        uint32_t index = 0;
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        continue;
-                }
-                if (ans == NULL || (ans != NULL && current_priority > q->proc[i]->priority)) {
-                        ans = q->proc[i];
-                        index = i;
-                }
-                current_priority = ans->priority;
+        struct pcb_t * ans = q->proc[0];
+        int i;
+        for (i = 1; i < q->size; i++) {
+                q->proc[i - 1] = q->proc[i];
+                q->proc[i] = NULL;
         }
-        q->proc[index] = NULL;
         q->size -= 1;
         return ans;
 }
