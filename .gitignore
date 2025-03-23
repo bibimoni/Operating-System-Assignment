@@ -1,2 +1,5 @@
+.cache/
+input/DS_Store
 compile_commands.json
 Assignment_SystemCall_HK242.pdf
+os
