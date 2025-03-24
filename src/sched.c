@@ -62,11 +62,6 @@ struct pcb_t * get_mlq_proc(void) {
 		break;
 	}
 	pthread_mutex_unlock(&queue_lock);
-	if (proc == NULL) {
-		// no remaining process or slot
-		// pthread_mutex_destroy(&queue_lock);
-		// init_scheduler();
-	}
 	return proc;	
 }
 
@@ -119,10 +114,6 @@ struct pcb_t * get_proc(void) {
 	pthread_mutex_lock(&queue_lock);
 	proc = dequeue(&ready_queue);
 	pthread_mutex_unlock(&queue_lock);
-	if (proc == NULL) {
-		// pthread_mutex_destroy(&queue_lock);
-		// init_scheduler();
-	}
 	return proc;
 }
 
