@@ -12,37 +12,87 @@
 #include "syscall.h"
 #include "stdio.h"
 #include "libmem.h"
+#include "queue.h"
+#include "sched.h"
+#include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
+static pthread_mutex_t queue_lock;
 
-int __sys_killall(struct pcb_t *caller, struct sc_regs* regs)
+int __sys_killall(struct pcb_t *caller, struct sc_regs *regs)
 {
     char proc_name[100];
-    uint32_t data;
-
-    //hardcode for demo only
     uint32_t memrg = regs->a1;
-    
-    /* TODO: Get name of the target proc */
-    //proc_name = libread..
+    uint32_t data;
     int i = 0;
-    data = 0;
-    while(data != -1){
-        libread(caller, memrg, i, &data);
-        proc_name[i]= data;
-        if(data == -1) proc_name[i]='\0';
+    do
+    {
+        if (libread(caller, memrg, i, &data) != 0)
+            break;
+        proc_name[i] = (char)data;
         i++;
-    }
+    } while ((BYTE)data != (BYTE)-1 && i < sizeof(proc_name) - 1);
+    if (i > 0)
+        proc_name[i - 1] = '\0';
+    else
+        proc_name[0] = '\0';
     printf("The procname retrieved from memregionid %d is \"%s\"\n", memrg, proc_name);
 
     /* TODO: Traverse proclist to terminate the proc
      *       stcmp to check the process match proc_name
      */
-    //caller->running_list
-    //caller->mlq_ready_queu
+    // caller->running_list
+    // caller->mlq_ready_queue
 
-    /* TODO Maching and terminating 
+    /* TODO Maching and terminating
      *       all processes with given
      *        name in var proc_name
      */
+    pthread_mutex_lock(&queue_lock);
 
-    return 0; 
+    for (int j = 0; j < caller->running_list->size; j++)
+    {
+        struct pcb_t *proc = caller->running_list->proc[j];
+
+        const char *filename = strrchr(proc->path, '/');
+        if (filename)
+            filename++;
+        else
+            filename = proc->path;
+        if (strcmp(filename, proc_name) == 0)
+        {
+            printf("Terminating running process PID: %d, Name: %s\n", proc->pid, filename);
+            remove_from_queue(caller->running_list, proc);
+            proc->pc = -1;
+        }
+    }
+
+    for (int prio = 0; prio < MAX_PRIO; prio++)
+    {
+        struct queue_t *q = &caller->mlq_ready_queue[prio];
+
+        for (int k = 0; k < q->size; k++)
+        {
+            struct pcb_t *proc = q->proc[k];
+
+            const char *filename = strrchr(proc->path, '/');
+            if (filename)
+                filename++;
+            else
+                filename = proc->path;
+
+            printf("mlq: %s\n", filename);
+
+            if (strcmp(filename, proc_name) == 0)
+            {
+                printf("Removing process PID: %d, Name: %s from MLQ queue\n", proc->pid, filename);
+                remove_from_queue(q, proc);
+                proc->pc = -1;
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&queue_lock);
+
+    return 0;
 }

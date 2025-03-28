@@ -1,6 +1,7 @@
-20 5
+20 6
 alloc 100 1
-write 80 1 0
-write 48 1 1
-write -1 1 2
+write 115 1 0
+write 99  1 1
+write 50  1 2
+write -1  1 3
 syscall 101 1

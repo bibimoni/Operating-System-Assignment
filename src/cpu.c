@@ -49,8 +49,8 @@ int read(
 }
 
 int write(
-	struct pcb_t *proc,	// Process executing the instruction
-	BYTE data,		// Data to be wrttien into memory
+	struct pcb_t *proc,	  // Process executing the instruction
+	BYTE data,			  // Data to be wrttien into memory
 	uint32_t destination, // Index of destination register
 	uint32_t offset)
 { // Destination address =
@@ -61,15 +61,26 @@ int write(
 int run(struct pcb_t *proc)
 {
 	/* Check if Program Counter point to the proper instruction */
+	if (proc->code == NULL)
+	{
+		printf("ERROR: proc->code is NULL!\n");
+		return 1;
+	}
+
 	if (proc->pc >= proc->code->size)
 	{
 		return 1;
 	}
 
 	struct inst_t ins = proc->code->text[proc->pc];
+	// printf("afterassign\n");
 	proc->pc++;
+	// printf("afterplus\n");
 	int stat = 1;
-switch (ins.opcode)
+	// printf("be4switch\n");
+	// printf("DEBUG: opcode = %d\n", ins.opcode);
+
+	switch (ins.opcode)
 	{
 	case CALC:
 		stat = calc(proc);
@@ -103,6 +114,7 @@ switch (ins.opcode)
 #endif
 		break;
 	case SYSCALL:
+		// printf("casesyscall\n");
 		stat = libsyscall(proc, ins.arg_0, ins.arg_1, ins.arg_2, ins.arg_3);
 		break;
 	default:

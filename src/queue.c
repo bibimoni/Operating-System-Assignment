@@ -2,46 +2,64 @@
 #include <stdlib.h>
 #include "queue.h"
 
-int empty(struct queue_t * q) {
-        if (q == NULL) return 1;
-	return (q->size == 0);
+int empty(struct queue_t *q)
+{
+        if (q == NULL)
+                return 1;
+        return (q->size == 0);
 }
 
-void enqueue(struct queue_t * q, struct pcb_t * proc) {
+void enqueue(struct queue_t *q, struct pcb_t *proc)
+{
         /* TODO: put a new process to queue [q] */
-        if (proc == NULL || q == NULL || q->size == MAX_QUEUE_SIZE) {
+        if (q == NULL || proc == NULL)
                 return;
-        }
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        q->proc[i] = proc;
-                        return;
-                }
-        }
+        q->proc[q->size] = proc;
+        q->size++;
 }
 
-struct pcb_t * dequeue(struct queue_t * q) {
+struct pcb_t *dequeue(struct queue_t *q)
+{
         /* TODO: return a pcb whose prioprity is the highest
          * in the queue [q] and remember to remove it from q
          * */
-        if (q == NULL || q->size == 0) {
+        if (empty(q))
                 return NULL;
+        struct pcb_t *returnProc = q->proc[0];
+        int q_size = q->size;
+        for (int i = 0; i < q_size - 1; i++)
+        {
+                q->proc[i] = q->proc[i + 1];
         }
-        struct pcb_t * ans = NULL;
-        uint32_t current_priority = 0;
-        uint32_t index = 0;
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        continue;
-                }
-                if (ans == NULL || (ans != NULL && current_priority > q->proc[i]->priority)) {
-                        ans = q->proc[i];
-                        index = i;
-                }
-                current_priority = ans->priority;
-        }
-        q->proc[index] = NULL;
-        q->size -= 1;
-        return ans;
+        q->proc[q_size - 1] = NULL;
+        q->size--;
+        return returnProc;
 }
 
+void remove_from_queue(struct queue_t *q, struct pcb_t *proc)
+{
+        if (q == NULL || empty(q))
+                return;
+
+        int found = -1;
+        for (int i = 0; i < q->size; i++)
+        {
+                if (q->proc[i] == proc)
+                {
+                        found = i;
+                        break;
+                }
+        }
+
+        if (found == -1)
+                return; // Không tìm thấy tiến trình trong hàng đợi
+
+        // Dịch chuyển các phần tử phía sau lên trước một vị trí
+        for (int i = found; i < q->size - 1; i++)
+        {
+                q->proc[i] = q->proc[i + 1];
+        }
+
+        q->proc[q->size - 1] = NULL; // Xóa phần tử cuối
+        q->size--;                   // Giảm kích thước hàng đợi
+}
