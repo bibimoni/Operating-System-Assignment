@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#undef MM_PAGING
+// #undef MM_PAGING
 
 static int time_slot;
 static int num_cpus;
