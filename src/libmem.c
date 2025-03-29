@@ -324,7 +324,7 @@ int pg_setval(struct mm_struct *mm, int addr, BYTE value, struct pcb_t *caller)
   regs.a3 = (uint32_t)value;
 
   /* SYSCALL 17 sys_memmap */
-  printf("Writing to phyaddr=%d, value=%d\n", phyaddr, value);
+  // printf("Writing to phyaddr=%d, value=%d\n", phyaddr, value);
   syscall(caller, 17, &regs);
   return 0;
 }
@@ -365,7 +365,7 @@ int libread(
 #ifdef IODUMP
   // printf("read region=%d offset=%d value=%d\n", source, offset, data);
 #ifdef PAGETBL_DUMP
-  print_pgtbl(proc, 0, -1); // print max TBL
+  // print_pgtbl(proc, 0, -1); // print max TBL
 #endif
   MEMPHY_dump(proc->mram);
 #endif
@@ -402,9 +402,9 @@ int libwrite(
     uint32_t offset)
 {
 #ifdef IODUMP
-  printf("write region=%d offset=%d value=%d\n", destination, offset, data);
+  // printf("write region=%d offset=%d value=%d\n", destination, offset, data);
 #ifdef PAGETBL_DUMP
-  print_pgtbl(proc, 0, -1); // print max TBL
+  // print_pgtbl(proc, 0, -1); // print max TBL
 #endif
   MEMPHY_dump(proc->mram);
 #endif

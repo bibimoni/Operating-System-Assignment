@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#undef IO_DUMP
+#undef PAGETBL_DUMP
 // #undef MM_PAGING
 static int time_slot;
 static int num_cpus;
@@ -69,7 +71,6 @@ static void *cpu_routine(void *args)
 		{
 			/* No process is running, the we load new process from
 			 * ready queue */
-			printf("proc == NULL, waiting for new process\n");
 			proc = get_proc();
 			if (proc == NULL)
 			{

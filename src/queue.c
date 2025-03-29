@@ -9,13 +9,56 @@ int empty(struct queue_t *q)
         return (q->size == 0);
 }
 
+void swap(struct pcb_t **a, struct pcb_t **b)
+{
+        struct pcb_t *tmp = *a;
+        *a = *b;
+        *b = tmp;
+}
+
+void sort_queue(struct queue_t *q)
+{
+        // no NULL pointers between elements in the queue
+        if (q == NULL || q->size < 2)
+        {
+                return;
+        }
+        int i, j;
+        for (i = 0; i < q->size; i++)
+        {
+                if (q->proc[i] == NULL)
+                {
+                        break;
+                }
+                for (j = i + 1; j < q->size; j++)
+                {
+                        if (q->proc[j] == NULL)
+                        {
+                                break;
+                        }
+#ifdef MLQ_SCHED
+                        if (q->proc[i]->prio > q->proc[j]->prio)
+                        {
+                                swap(&q->proc[i], &q->proc[j]);
+                        }
+#else
+                        if (q->proc[i]->priority > q->proc[j]->priority)
+                        {
+                                swap(&q->proc[i], &q->proc[j]);
+                        }
+#endif
+                }
+        }
+}
+
 void enqueue(struct queue_t *q, struct pcb_t *proc)
 {
         /* TODO: put a new process to queue [q] */
-        if (q == NULL || proc == NULL)
+        if (proc == NULL || q == NULL || q->size == MAX_QUEUE_SIZE)
+        {
                 return;
-        q->proc[q->size] = proc;
-        q->size++;
+        }
+        q->proc[q->size++] = proc;
 }
 
 struct pcb_t *dequeue(struct queue_t *q)
@@ -23,19 +66,21 @@ struct pcb_t *dequeue(struct queue_t *q)
         /* TODO: return a pcb whose prioprity is the highest
          * in the queue [q] and remember to remove it from q
          * */
-        if (empty(q))
-                return NULL;
-        struct pcb_t *returnProc = q->proc[0];
-        int q_size = q->size;
-        for (int i = 0; i < q_size - 1; i++)
+        if (q == NULL || q->size == 0)
         {
-                q->proc[i] = q->proc[i + 1];
+                return NULL;
         }
-        q->proc[q_size - 1] = NULL;
-        q->size--;
-        return returnProc;
+        sort_queue(q);
+        struct pcb_t *ans = q->proc[0];
+        int i;
+        for (i = 1; i < q->size; i++)
+        {
+                q->proc[i - 1] = q->proc[i];
+                q->proc[i] = NULL;
+        }
+        q->size -= 1;
+        return ans;
 }
-
 void remove_from_queue(struct queue_t *q, struct pcb_t *proc)
 {
         if (q == NULL || empty(q))
@@ -52,14 +97,12 @@ void remove_from_queue(struct queue_t *q, struct pcb_t *proc)
         }
 
         if (found == -1)
-                return; // Không tìm thấy tiến trình trong hàng đợi
-
-        // Dịch chuyển các phần tử phía sau lên trước một vị trí
+                return;
         for (int i = found; i < q->size - 1; i++)
         {
                 q->proc[i] = q->proc[i + 1];
         }
 
-        q->proc[q->size - 1] = NULL; // Xóa phần tử cuối
-        q->size--;                   // Giảm kích thước hàng đợi
+        q->proc[q->size - 1] = NULL;
+        q->size--;
 }

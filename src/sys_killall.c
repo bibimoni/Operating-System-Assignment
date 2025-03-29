@@ -67,6 +67,7 @@ int __sys_killall(struct pcb_t *caller, struct sc_regs *regs)
         }
     }
 
+#ifdef MLQ_SCHED
     for (int prio = 0; prio < MAX_PRIO; prio++)
     {
         struct queue_t *q = &caller->mlq_ready_queue[prio];
@@ -91,7 +92,24 @@ int __sys_killall(struct pcb_t *caller, struct sc_regs *regs)
             }
         }
     }
+#else
+    for (int j = 0; j < caller->ready_queue->size; j++)
+    {
+        struct pcb_t *proc = caller->ready_queue->proc[j];
 
+        const char *filename = strrchr(proc->path, '/');
+        if (filename)
+            filename++;
+        else
+            filename = proc->path;
+        if (strcmp(filename, proc_name) == 0)
+        {
+            printf("Terminating process in ready queue PID: %d, Name: %s\n", proc->pid, filename);
+            remove_from_queue(caller->running_list, proc);
+            proc->pc = -1;
+        }
+    }
+#endif
     pthread_mutex_unlock(&queue_lock);
 
     return 0;

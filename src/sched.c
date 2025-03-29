@@ -120,6 +120,10 @@ struct pcb_t *get_proc(void)
 	/*TODO: get a process from [ready_queue].
 	 * Remember to use lock to protect the queue.
 	 * */
+	pthread_mutex_lock(&queue_lock);
+	proc = dequeue(&ready_queue);
+	enqueue(&running_list, proc);
+	pthread_mutex_unlock(&queue_lock);
 	return proc;
 }
 
@@ -132,6 +136,7 @@ void put_proc(struct pcb_t *proc)
 
 	pthread_mutex_lock(&queue_lock);
 	enqueue(&run_queue, proc);
+	remove_from_queue(&running_list, proc);
 	pthread_mutex_unlock(&queue_lock);
 }
 
