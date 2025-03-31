@@ -163,9 +163,6 @@
    /*TODO dump memphy contnt mp->storage
     *     for tracing the memory content
     */
- #ifdef SYNC
-   pthread_mutex_lock(&MEM_in_use);
- #endif
    printf("\n");
    printf("Print content of RAM (only print nonzero value)\n");
    for (int i = 0; i < mp->maxsz; i++)
@@ -177,9 +174,7 @@
      }
    }
    printf("---------------------------------\n");
- #ifdef SYNC
-   pthread_mutex_unlock(&MEM_in_use);
- #endif
+ 
     return 0;
  }
  
