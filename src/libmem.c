@@ -188,9 +188,9 @@ int pg_getval(struct mm_struct *mm, int addr, BYTE *data, struct pcb_t *caller)
   //regs.a3 = ...
 
   /* SYSCALL 17 sys_memmap */
-  syscall(caller, 17, &regs);
+  // syscall(caller, 17, &regs);
   // Update data
-  *data = (BYTE)regs.a3;
+  // *data = (BYTE)regs.a3;
 
   return 0;
 }
