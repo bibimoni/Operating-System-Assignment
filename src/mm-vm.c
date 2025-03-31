@@ -52,9 +52,7 @@
   */
  struct vm_rg_struct *get_vm_area_node_at_brk(struct pcb_t *caller, int vmaid, int size, int alignedsz)
  {
-   #ifdef TDBG
-   printf("get_vm_area_node_at_brk\n");
-   #endif
+  
    struct vm_rg_struct *newrg;
    /* TODO retrive current vma to obtain newrg, current comment out due to compiler redundant warning*/
    struct vm_area_struct *cur_vma = get_vma_by_num(caller->mm, vmaid);
@@ -81,9 +79,6 @@
  int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int vmaend)
  {
    //struct vm_area_struct *vma = caller->mm->mmap;
-   #ifdef TDBG
-   printf("validate_overlap_vm_area\n");
-   #endif
    /* TODO validate the planned memory area is not overlapped */
    struct vm_area_struct *vma = caller->mm->mmap;
  
@@ -107,9 +102,6 @@
   */
  int inc_vma_limit(struct pcb_t *caller, int vmaid, int inc_sz)
  {
-   #ifdef TDBG
-   printf("inc_vma_limit\n");
-   #endif
    struct vm_rg_struct * newrg = malloc(sizeof(struct vm_rg_struct));
    int inc_amt = PAGING_PAGE_ALIGNSZ(inc_sz);
    int incnumpage =  inc_amt / PAGING_PAGESZ;
