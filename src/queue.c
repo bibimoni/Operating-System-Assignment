@@ -7,17 +7,46 @@ int empty(struct queue_t * q) {
 	return (q->size == 0);
 }
 
+void swap(struct pcb_t ** a, struct pcb_t ** b) {
+        struct pcb_t *tmp = *a;
+        *a = *b;
+        *b = tmp;
+}
+
+void sort_queue(struct queue_t * q) {
+        // no NULL pointers between elements in the queue
+        if (q == NULL || q->size < 2) {
+                return;
+        }
+        int i, j;
+        for (i = 0; i < q->size; i++) {
+                if (q->proc[i] == NULL) {
+                        break;
+                }
+                for (j = i + 1; j < q->size; j++) {
+                        if (q->proc[j] == NULL) {
+                                break;
+                        }
+                        #ifdef MLQ_SCHED
+                        if (q->proc[i]->prio > q->proc[j]->prio) {
+                                swap(&q->proc[i], &q->proc[j]);
+                        }
+                        #else 
+                        if (q->proc[i]->priority > q->proc[j]->priority) {
+                                swap(&q->proc[i], &q->proc[j]);
+                        }
+                        #endif
+
+                }
+        }
+}
+
 void enqueue(struct queue_t * q, struct pcb_t * proc) {
         /* TODO: put a new process to queue [q] */
         if (proc == NULL || q == NULL || q->size == MAX_QUEUE_SIZE) {
                 return;
         }
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        q->proc[i] = proc;
-                        return;
-                }
-        }
+        q->proc[q->size++] = proc;
 }
 
 struct pcb_t * dequeue(struct queue_t * q) {
@@ -27,20 +56,13 @@ struct pcb_t * dequeue(struct queue_t * q) {
         if (q == NULL || q->size == 0) {
                 return NULL;
         }
-        struct pcb_t * ans = NULL;
-        uint32_t current_priority = 0;
-        uint32_t index = 0;
-        for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-                if (q->proc[i] == NULL) {
-                        continue;
-                }
-                if (ans == NULL || (ans != NULL && current_priority > q->proc[i]->priority)) {
-                        ans = q->proc[i];
-                        index = i;
-                }
-                current_priority = ans->priority;
+        sort_queue(q);
+        struct pcb_t * ans = q->proc[0];
+        int i;
+        for (i = 1; i < q->size; i++) {
+                q->proc[i - 1] = q->proc[i];
+                q->proc[i] = NULL;
         }
-        q->proc[index] = NULL;
         q->size -= 1;
         return ans;
 }
