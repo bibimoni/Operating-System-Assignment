@@ -1,4 +1,20 @@
-#include "string.h"
+/*
+ * Copyright (C) 2025 pdnguyen of HCMC University of Technology VNU-HCM
+ */
+
+/* Sierra release
+ * Source Code License Grant: The authors hereby grant to Licensee
+ * personal permission to use and modify the Licensed Source Code
+ * for the sole purpose of studying while attending the course CO2018.
+ */
+
+// #ifdef MM_PAGING
+/*
+ * System Library
+ * Memory Module Library libmem.c 
+ */
+
+ #include "string.h"
 #include "mm.h"
 #include "syscall.h"
 #include "libmem.h"
@@ -6,9 +22,13 @@
 #include <stdio.h>
 #include <pthread.h>
 
-// Removed unused mmvm_lock
-// static pthread_mutex_t mmvm_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mmvm_lock = PTHREAD_MUTEX_INITIALIZER;
 
+/*enlist_vm_freerg_list - add new rg to freerg_list
+ *@mm: memory region
+ *@rg_elmt: new region
+ *
+ */
 int enlist_vm_freerg_list(struct mm_struct *mm, struct vm_rg_struct *rg_elmt) {
     struct vm_rg_struct *rg_node = mm->mmap->vm_freerg_list;
 
