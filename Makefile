@@ -6,6 +6,7 @@ SRC = src
 OBJ = obj
 INCLUDE = include
 
+
 CC = gcc
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
@@ -23,7 +24,7 @@ OS_OBJ = $(addprefix $(OBJ)/, cpu.o mem.o loader.o queue.o os.o sched.o timer.o 
 OS_OBJ += $(SYSCALL_OBJ)
 SCHED_OBJ = $(addprefix $(OBJ)/, cpu.o loader.o)
 HEADER = $(wildcard $(INCLUDE)/*.h)
- 
+SYSCALL_OBJ += $(addprefix $(OBJ)/, sys_xxxhandler.o)
 all: os
 #mem sched os
 

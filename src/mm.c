@@ -193,7 +193,7 @@ int alloc_pages_range(struct pcb_t *caller, int req_pgnum, struct framephy_struc
    
  }
 
-  return 0;
+  return 0; // Cấp phát thành công
 }
  
  /*

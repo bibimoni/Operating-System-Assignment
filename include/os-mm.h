@@ -7,17 +7,19 @@
 
 typedef char BYTE;
 typedef uint32_t addr_t;
-//typedef unsigned int uint32_t;
+// typedef unsigned int uint32_t;
 
-struct pgn_t{
+struct pgn_t
+{
    int pgn;
-   struct pgn_t *pg_next; 
+   struct pgn_t *pg_next;
 };
 
 /*
  *  Memory region struct
  */
-struct vm_rg_struct {
+struct vm_rg_struct
+{
    unsigned long rg_start;
    unsigned long rg_end;
 
@@ -27,25 +29,27 @@ struct vm_rg_struct {
 /*
  *  Memory area struct
  */
-struct vm_area_struct {
+struct vm_area_struct
+{
    unsigned long vm_id;
    unsigned long vm_start;
    unsigned long vm_end;
 
    unsigned long sbrk;
-/*
- * Derived field
- * unsigned long vm_limit = vm_end - vm_start
- */
+   /*
+    * Derived field
+    * unsigned long vm_limit = vm_end - vm_start
+    */
    struct mm_struct *vm_mm;
    struct vm_rg_struct *vm_freerg_list;
    struct vm_area_struct *vm_next;
 };
 
-/* 
+/*
  * Memory management struct
  */
-struct mm_struct {
+struct mm_struct
+{
    uint32_t *pgd;
 
    struct vm_area_struct *mmap;
@@ -60,20 +64,22 @@ struct mm_struct {
 /*
  * FRAME/MEM PHY struct
  */
-struct framephy_struct { 
+struct framephy_struct
+{
    int fpn;
    struct framephy_struct *fp_next;
 
    /* Resereed for tracking allocated framed */
-   struct mm_struct* owner;
+   struct mm_struct *owner;
 };
 
-struct memphy_struct {
+struct memphy_struct
+{
    /* Basic field of data and size */
    BYTE *storage;
    int maxsz;
-   
-   /* Sequential device fields */ 
+
+   /* Sequential device fields */
    int rdmflg;
    int cursor;
 
