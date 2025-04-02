@@ -29,16 +29,9 @@ void sort_queue(struct queue_t * q) {
                         if (q->proc[j] == NULL) {
                                 break;
                         }
-                        #ifdef MLQ_SCHED
-                        if (q->proc[i]->prio > q->proc[j]->prio) {
+                       if (q->proc[i]->priority > q->proc[j]->priority) {
                                 swap(&q->proc[i], &q->proc[j]);
                         }
-                        #else 
-                        if (q->proc[i]->priority > q->proc[j]->priority) {
-                                swap(&q->proc[i], &q->proc[j]);
-                        }
-                        #endif
-
                 }
         }
 }
