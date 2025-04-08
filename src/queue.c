@@ -53,7 +53,7 @@ struct pcb_t *dequeue(struct queue_t *q)
         {
                 return NULL;
         }
-        sort_queue(q);
+        // sort_queue(q);
         struct pcb_t * ans = q->proc[0];
         int i;
         for (i = 1; i < q->size; i++) {

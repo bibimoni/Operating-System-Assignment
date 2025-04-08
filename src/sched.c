@@ -56,7 +56,7 @@ struct pcb_t * get_mlq_proc(void) {
 	 * */
 	int prio;
 	pthread_mutex_lock(&queue_lock);
-  bool slot_non_zero = false;
+  int slot_non_zero = 0;
 	for (prio = 0; prio < MAX_PRIO; prio++) {
 		slot_non_zero |= slot[prio] != 0;
     if (slot[prio] == 0 || empty(&mlq_ready_queue[prio])) {
