@@ -13,7 +13,7 @@ int queue_empty(void);
 
 void init_scheduler(void);
 void finish_scheduler(void);
-
+void update_time_left(int);
 /* Get the next process from ready queue */
 struct pcb_t * get_proc(void);
 

@@ -12,7 +12,7 @@
 
 #undef IO_DUMP
 #undef PAGETBL_DUMP
-// #undef MM_PAGING
+#undef MM_PAGING
 static int time_slot;
 static int num_cpus;
 static int done = 0;
@@ -118,6 +118,7 @@ static void *cpu_routine(void *args)
 		}
 
 		/* Run current process */
+		// printf("\t Process %d pc: %d\n", proc->pid, proc->pc);
 		run(proc);
 		time_left--;
 		next_slot(timer_id);
@@ -244,6 +245,10 @@ int main(int argc, char *argv[])
 	strcat(path, "input/");
 	strcat(path, argv[1]);
 	read_config(path);
+
+	// -------------------------
+	update_time_left(time_slot);
+	// got added for scheduling
 
 	pthread_t *cpu = (pthread_t *)malloc(num_cpus * sizeof(pthread_t));
 	struct cpu_args *args =
