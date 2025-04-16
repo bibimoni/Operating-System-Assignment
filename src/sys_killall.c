@@ -8,109 +8,95 @@
  * for the sole purpose of studying while attending the course CO2018.
  */
 
-#include "common.h"
-#include "syscall.h"
-#include "stdio.h"
-#include "libmem.h"
-#include "queue.h"
-#include "sched.h"
-#include <pthread.h>
-#include <stdlib.h>
-#include <string.h>
-static pthread_mutex_t queue_lock;
-
-int __sys_killall(struct pcb_t *caller, struct sc_regs *regs)
-{
-    char proc_name[100];
-    uint32_t memrg = regs->a1;
-    uint32_t data;
-    int i = 0;
-    do
-    {
-        if (libread(caller, memrg, i, &data) != 0)
-            break;
-        proc_name[i] = (char)data;
-        i++;
-    } while ((BYTE)data != (BYTE)-1 && i < sizeof(proc_name) - 1);
-    if (i > 0)
-        proc_name[i - 1] = '\0';
-    else
-        proc_name[0] = '\0';
-    printf("The procname retrieved from memregionid %d is \"%s\"\n", memrg, proc_name);
-
-    /* TODO: Traverse proclist to terminate the proc
-     *       stcmp to check the process match proc_name
-     */
-    // caller->running_list
-    // caller->mlq_ready_queue
-
-    /* TODO Maching and terminating
-     *       all processes with given
-     *        name in var proc_name
-     */
-    pthread_mutex_lock(&queue_lock);
-
-    for (int j = 0; j < caller->running_list->size; j++)
-    {
-        struct pcb_t *proc = caller->running_list->proc[j];
-
-        const char *filename = strrchr(proc->path, '/');
-        if (filename)
-            filename++;
-        else
-            filename = proc->path;
-        if (strcmp(filename, proc_name) == 0)
-        {
-            printf("Terminating running process PID: %d, Name: %s\n", proc->pid, filename);
-            remove_from_queue(caller->running_list, proc);
-            proc->pc = -1;
-        }
-    }
-
-#ifdef MLQ_SCHED
-    for (int prio = 0; prio < MAX_PRIO; prio++)
-    {
-        struct queue_t *q = &caller->mlq_ready_queue[prio];
-
-        for (int k = 0; k < q->size; k++)
-        {
-            struct pcb_t *proc = q->proc[k];
-
-            const char *filename = strrchr(proc->path, '/');
-            if (filename)
-                filename++;
-            else
-                filename = proc->path;
-
-            printf("mlq: %s\n", filename);
-
-            if (strcmp(filename, proc_name) == 0)
-            {
-                printf("Removing process PID: %d, Name: %s from MLQ queue\n", proc->pid, filename);
-                remove_from_queue(q, proc);
-                proc->pc = -1;
-            }
-        }
-    }
-#else
-    for (int j = 0; j < caller->ready_queue->size; j++)
-    {
-        struct pcb_t *proc = caller->ready_queue->proc[j];
-
-        const char *filename = strrchr(proc->path, '/');
-        if (filename)
-            filename++;
-        else
-            filename = proc->path;
-        if (strcmp(filename, proc_name) == 0)
-        {
-            printf("Terminating process in ready queue PID: %d, Name: %s\n", proc->pid, filename);
-            remove_from_queue(caller->running_list, proc);
-            proc->pc = -1;
-        }
-    }
-#endif
-    pthread_mutex_unlock(&queue_lock);
-
-    return 0;
-}
+ #include "common.h"
+ #include "syscall.h"
+ #include "stdio.h"
+ #include "libmem.h"
+ #include "queue.h"
+ #include "string.h"
+ #include "stdlib.h"
+ int __sys_killall(struct pcb_t *caller, struct sc_regs *regs)
+ {
+     char proc_name[100];
+     uint32_t data;
+ 
+     // hardcode for demo only
+     uint32_t memrg = regs->a1;
+ 
+     /* TODO: Get name of the target proc */
+     // proc_name = libread..
+     int i = 0;
+     data = 0;
+     while (data != (uint32_t)-1)
+     {
+         libread(caller, memrg, i, &data);
+         proc_name[i] = data;
+         if (data == -1)
+             proc_name[i] = '\0';
+         i++;
+     }
+     printf("The procname retrieved from memregionid %d is \"%s\"\n", memrg, proc_name);
+ 
+     /* TODO: Traverse proclist to terminate the proc
+      *       stcmp to check the process match proc_name
+      */
+ 
+     // caller->running_list
+     int kill_count = 0;
+     if (caller->running_list != NULL)
+     {
+         struct pcb_t *target;
+         for (int i = 0; i < caller->running_list->size; i++)
+         {
+             target = caller->running_list->proc[i];
+             if (target && strcmp(target->path, proc_name) == 0)
+             {
+                 printf("Terminating running process PID=%d named \"%s\"\n", target->pid, target->path);
+                 free(target);
+                 caller->running_list->proc[i] = NULL;
+                 kill_count++;
+             }
+         }
+     }
+ // caller->mlq_ready_queue
+ #ifdef MLQ_SCHED
+     if (caller->mlq_ready_queue != NULL)
+     {
+         for (int q = 0; q < MAX_QUEUE_SIZE; q++)
+         {
+             struct queue_t *qptr = &caller->mlq_ready_queue[q];
+             for (int i = 0; i < qptr->size; i++)
+             {
+                 struct pcb_t *target = qptr->proc[i];
+                 if (target && strcmp(target->path, proc_name) == 0)
+                 {
+                     printf("Terminating MLQ ready process PID=%d named \"%s\"\n", target->pid, target->path);
+                     free(target);
+                     qptr->proc[i] = NULL;
+                     kill_count++;
+                 }
+             }
+         }
+     }
+ #endif
+     /* TODO Maching and terminating
+      *       all processes with given
+      *        name in var proc_name
+      */
+     if (caller->ready_queue != NULL)
+     {
+         for (int i = 0; i < caller->ready_queue->size; i++)
+         {
+             struct pcb_t *target = caller->ready_queue->proc[i];
+             if (target && strcmp(target->path, proc_name) == 0)
+             {
+                 printf("Terminating ready process PID=%d named \"%s\"\n", target->pid, target->path);
+                 free(target);
+                 caller->ready_queue->proc[i] = NULL;
+                 kill_count++;
+             }
+         }
+     }
+     return kill_count;
+ }
+ 

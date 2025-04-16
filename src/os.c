@@ -12,7 +12,7 @@
 
 #undef IO_DUMP
 #undef PAGETBL_DUMP
-#undef MM_PAGING
+// #undef MM_PAGING
 static int time_slot;
 static int num_cpus;
 static int done = 0;
@@ -81,8 +81,8 @@ static void *cpu_routine(void *args)
 		else if (proc->pc == proc->code->size)
 		{
 			/* The porcess has finish it job */
-			printf("\tCPU %d: Processed %2d has finished\n",
-				   id, proc->pid);
+			printf("\tCPU %d: Processed %2d has been terminated\n",
+				id, proc->pid);
 			free(proc);
 			proc = get_proc();
 			time_left = 0;
